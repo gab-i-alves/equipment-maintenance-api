@@ -30,4 +30,5 @@ public class AlteracaoSolicitacao {
 
     private LocalDateTime dataHoraEfetuada;
 
+
 }
