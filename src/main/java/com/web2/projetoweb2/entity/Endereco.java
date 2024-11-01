@@ -19,4 +19,5 @@ public class Endereco {
     private String logradouro;
     private String complemento;
     private String cep;
+    private Integer numero;
 }

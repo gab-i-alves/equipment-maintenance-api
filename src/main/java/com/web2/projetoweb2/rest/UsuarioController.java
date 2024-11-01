@@ -1,3 +1,7 @@
+package com.web2.projetoweb2.rest;
+
+import com.web2.projetoweb2.entity.Usuario;
+import com.web2.projetoweb2.services.UsuarioService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -34,15 +38,18 @@ public class UsuarioController {
     }
 
 
-    @PutMapping("/{id}")
-    public ResponseEntity<Usuario> updateUsuario(@PathVariable Integer id, @RequestBody Usuario usuarioDetails) {
+    @PutMapping("/update/{id}")
+    public ResponseEntity<?> updateUsuario(@PathVariable Long id, @RequestBody Usuario usuarioDetails) {
         Optional<Usuario> updatedUsuario = usuarioService.updateUsuario(id, usuarioDetails);
-        return updatedUsuario.map(value -> new ResponseEntity<>(value, HttpStatus.OK))
-                             .orElseGet(() -> new ResponseEntity<>(HttpStatus.NOT_FOUND));
+
+        if (updatedUsuario.isPresent()) {
+            return new ResponseEntity<>(updatedUsuario.get(), HttpStatus.OK);
+        } else {
+            return new ResponseEntity<>("Usuário não encontrado", HttpStatus.NOT_FOUND);
+        }
     }
 
-   
-    @DeleteMapping("/{id}")
+    @DeleteMapping("/delete/{id}")
     public ResponseEntity<Void> deleteUsuario(@PathVariable Integer id) {
         boolean deleted = usuarioService.deleteUsuario(id);
         return deleted ? new ResponseEntity<>(HttpStatus.NO_CONTENT) : new ResponseEntity<>(HttpStatus.NOT_FOUND);
