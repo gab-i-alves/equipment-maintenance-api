@@ -14,4 +14,6 @@ import java.util.Optional;
 import java.util.function.Function;
 
 @Repository
-public interface SolicitacaoRepository extends JpaRepository<Solicitacao, Integer> { }
+public interface SolicitacaoRepository extends JpaRepository<Solicitacao, Integer> {
+    List<Solicitacao> findByClienteId(Integer idCliente);
+}

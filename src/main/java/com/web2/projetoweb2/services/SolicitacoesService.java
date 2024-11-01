@@ -1,7 +1,13 @@
 package com.web2.projetoweb2.services;
 
+import com.web2.projetoweb2.entity.CategoriaEquipamento;
+import com.web2.projetoweb2.entity.EstadoSolicitacao;
 import com.web2.projetoweb2.entity.Solicitacao;
+import com.web2.projetoweb2.entity.Usuario;
+import com.web2.projetoweb2.repositorys.CategoriaEquipamentoRepository;
+import com.web2.projetoweb2.repositorys.EstadoSolicitacaoRepository;
 import com.web2.projetoweb2.repositorys.SolicitacaoRepository;
+import com.web2.projetoweb2.repositorys.UsuarioRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -10,8 +16,17 @@ import java.util.Optional;
 
 @Service
 public class SolicitacoesService {
-    @Autowired
-    private SolicitacaoRepository solicitacaoRepository;
+    private final SolicitacaoRepository solicitacaoRepository;
+    private final UsuarioRepository usuarioRepository;
+    private final EstadoSolicitacaoRepository estadoSolicitacaoRepository;
+    private final CategoriaEquipamentoRepository categoriaEquipamentoRepository;
+
+    public SolicitacoesService(SolicitacaoRepository solicitacaoRepository, UsuarioRepository usuarioRepository, EstadoSolicitacaoRepository estadoSolicitacaoRepository, CategoriaEquipamentoRepository categoriaEquipamentoRepository) {
+        this.solicitacaoRepository = solicitacaoRepository;
+        this.usuarioRepository = usuarioRepository;
+        this.estadoSolicitacaoRepository = estadoSolicitacaoRepository;
+        this.categoriaEquipamentoRepository = categoriaEquipamentoRepository;
+    }
 
     public List<Solicitacao> getAllSolicitacoes() {
         return solicitacaoRepository.findAll();
@@ -21,7 +36,21 @@ public class SolicitacoesService {
         return solicitacaoRepository.findById(id);
     }
 
+    public List<Solicitacao> getSolicitacoesByClienteId(Integer idCliente) {
+        return solicitacaoRepository.findByClienteId(idCliente);
+    }
+
     public Solicitacao createSolicitacao(Solicitacao solicitacao) {
+        Usuario cliente = usuarioRepository.findById(solicitacao.getCliente().getId());
+        Optional<EstadoSolicitacao> estadoSolicitacao = estadoSolicitacaoRepository.findById(solicitacao.getEstadoSolicitacao().getId());
+        Optional<CategoriaEquipamento> categoria = categoriaEquipamentoRepository.findById(solicitacao.getCategoriaEquipamento().getId());
+
+        if (cliente != null) {
+            solicitacao.setCliente(cliente);
+        }
+        estadoSolicitacao.ifPresent(solicitacao::setEstadoSolicitacao);
+        categoria.ifPresent(solicitacao::setCategoriaEquipamento);
+
         return solicitacaoRepository.save(solicitacao);
     }
 
