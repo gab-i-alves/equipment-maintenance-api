@@ -54,4 +54,14 @@ public class UsuarioController {
         boolean deleted = usuarioService.deleteUsuario(id);
         return deleted ? new ResponseEntity<>(HttpStatus.NO_CONTENT) : new ResponseEntity<>(HttpStatus.NOT_FOUND);
     }
+
+    @PostMapping("/login")
+    public ResponseEntity<?> login(@RequestParam String email, @RequestParam String senha) {
+        try {
+            Usuario usuario = usuarioService.login(email, senha);
+            return ResponseEntity.ok(usuario);
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("E-mail ou senha incorretos.");
+        }
+    }
 }

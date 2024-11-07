@@ -4,6 +4,7 @@ import com.web2.projetoweb2.entity.Usuario;
 import com.web2.projetoweb2.repositorys.UsuarioRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 import java.time.LocalDateTime;
 import java.util.Date;
@@ -14,6 +15,8 @@ import java.util.Optional;
 public class UsuarioService {
     @Autowired
     private UsuarioRepository usuarioRepository;
+    
+    private BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 
     public List<Usuario> getAllUsuarios() {
         return usuarioRepository.findAll();
@@ -25,6 +28,7 @@ public class UsuarioService {
 
     public Usuario createUsuario(Usuario usuario) {
         usuario.setDataCriacao(LocalDateTime.now());
+        usuario.setSenha(passwordEncoder.encode(usuario.getSenha()));
         return usuarioRepository.save(usuario);
     }
 
@@ -46,5 +50,16 @@ public class UsuarioService {
             usuarioRepository.delete(usuario);
             return true;
         }).orElse(false);
+    }
+
+    public Usuario login(String email, String senha) {
+        Usuario usuario = usuarioRepository.findByEmail(email)
+        .orElseThrow(() -> new RuntimeException("Usuário não encontrado"));
+
+        if (!passwordEncoder.matches(senha, usuario.getSenha())) {
+            throw new RuntimeException("Senha incorreta");
+        }
+
+        return usuario;
     }
 }
