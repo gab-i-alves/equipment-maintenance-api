@@ -2,6 +2,7 @@ package com.web2.projetoweb2.entity;
 
 import jakarta.persistence.*;
 import lombok.Data;
+import lombok.ToString;
 
 import java.time.LocalDateTime;
 
@@ -15,8 +16,10 @@ public class Usuario {
 
     private String nome;
     private String email;
-    private String senha;
     private Boolean ativo;
+    
+    @ToString.Exclude
+    private String senha;
 
     @ManyToOne
     @JoinColumn(name = "idTipo")
