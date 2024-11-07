@@ -5,6 +5,7 @@ import com.web2.projetoweb2.repositorys.UsuarioRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import java.security.NoSuchAlgorithmException;
 
 import java.time.LocalDateTime;
 import java.util.Date;
@@ -16,7 +17,9 @@ public class UsuarioService {
     @Autowired
     private UsuarioRepository usuarioRepository;
     
-    private BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
+    // private BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
+    @Autowired
+    private PasswordHashingService passwordHashingService;
 
     public List<Usuario> getAllUsuarios() {
         return usuarioRepository.findAll();
@@ -27,9 +30,16 @@ public class UsuarioService {
     }
 
     public Usuario createUsuario(Usuario usuario) {
-        usuario.setDataCriacao(LocalDateTime.now());
-        usuario.setSenha(passwordEncoder.encode(usuario.getSenha()));
-        return usuarioRepository.save(usuario);
+        try {
+            String salt = passwordHashingService.generateSalt();
+            String hashedPassword = passwordHashingService.hashPassword(usuario.getSenha(), salt);
+            usuario.setDataCriacao(LocalDateTime.now());
+            usuario.setSenha(hashedPassword);
+            usuario.setSalt(salt);
+            return usuarioRepository.save(usuario);
+        } catch (NoSuchAlgorithmException e) {
+            throw new RuntimeException("Erro ao fazer o hash", e);
+        }
     }
 
     public Optional<Usuario> updateUsuario(Long id, Usuario usuarioAtualizado) {
@@ -52,14 +62,19 @@ public class UsuarioService {
         }).orElse(false);
     }
 
-    public Usuario login(String email, String senha) {
-        Usuario usuario = usuarioRepository.findByEmail(email)
-        .orElseThrow(() -> new RuntimeException("Usuário não encontrado"));
-
-        if (!passwordEncoder.matches(senha, usuario.getSenha())) {
-            throw new RuntimeException("Senha incorreta");
+    public Optional<Usuario> login(String email, String senha) {
+        try {
+            Optional<Usuario> usuarioOpt = usuarioRepository.findByEmail(email);
+            if (usuarioOpt.isPresent()) {
+                Usuario usuario = usuarioOpt.get();
+                boolean isPasswordValid = passwordHashingService.verifyPassword(senha, usuario.getSalt(), usuario.getSenha());
+                if (isPasswordValid) {
+                    return Optional.of(usuario);
+                }
+            }
+            return Optional.empty();
+        } catch (NoSuchAlgorithmException e) {
+            throw new RuntimeException("Erro ao verificar a senha", e);
         }
-
-        return usuario;
     }
 }

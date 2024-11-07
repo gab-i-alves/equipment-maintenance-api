@@ -21,6 +21,8 @@ public class Usuario {
     @ToString.Exclude
     private String senha;
 
+    private String salt;
+
     @ManyToOne
     @JoinColumn(name = "idTipo")
     private TipoPerfil tipoPerfil;
