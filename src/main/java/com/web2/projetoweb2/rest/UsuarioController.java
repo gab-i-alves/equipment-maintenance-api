@@ -57,10 +57,11 @@ public class UsuarioController {
 
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestParam String email, @RequestParam String senha) {
-        try {
-            Usuario usuario = usuarioService.login(email, senha);
+        Optional<Usuario> usuarioOpt = usuarioService.login(email, senha);
+        if (usuarioOpt.isPresent()) {
+            Usuario usuario = usuarioOpt.get();
             return ResponseEntity.ok(usuario);
-        } catch (RuntimeException e) {
+        } else {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("E-mail ou senha incorretos.");
         }
     }
