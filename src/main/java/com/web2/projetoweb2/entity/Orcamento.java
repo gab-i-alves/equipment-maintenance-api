@@ -23,6 +23,13 @@ public class Orcamento {
     private Solicitacao solicitacao;
 
     private Boolean aprovado;
+    private Boolean rejeitado;
+
+    private LocalDateTime dataHoraAprovacao;
+
     private String motivoRejeicao;
+    private LocalDateTime dataHoraRejeicao;
+
     private LocalDateTime dataHoraCriacao;
+
 }
