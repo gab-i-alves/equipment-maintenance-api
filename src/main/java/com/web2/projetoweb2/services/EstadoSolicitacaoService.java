@@ -28,4 +28,8 @@ public class EstadoSolicitacaoService {
     public Optional<EstadoSolicitacao> buscarPorId(Integer id) {
         return estadoSolicitacaoRepository.findById(id);
     }
+
+    public Optional<EstadoSolicitacao> buscarPorDescricao(String desc) {
+        return estadoSolicitacaoRepository.findByDescricaoIgnoreCase(desc);
+    }
 }

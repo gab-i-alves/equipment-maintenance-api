@@ -36,6 +36,10 @@ public class SolicitacoesService {
         return solicitacaoRepository.findById(id);
     }
 
+    public List<Solicitacao> getSolicitacaoByEstado(EstadoSolicitacao estadoSolicitacao) {
+        return solicitacaoRepository.findByEstadoSolicitacao(estadoSolicitacao);
+    }
+
     public List<Solicitacao> getSolicitacoesByClienteId(Integer idCliente) {
         return solicitacaoRepository.findByClienteId(idCliente);
     }

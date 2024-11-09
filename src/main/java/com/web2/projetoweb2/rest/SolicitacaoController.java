@@ -1,6 +1,8 @@
 package com.web2.projetoweb2.rest;
 
+import com.web2.projetoweb2.entity.EstadoSolicitacao;
 import com.web2.projetoweb2.entity.Solicitacao;
+import com.web2.projetoweb2.services.EstadoSolicitacaoService;
 import com.web2.projetoweb2.services.SolicitacoesService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -16,6 +18,8 @@ public class SolicitacaoController {
 
     @Autowired
     private SolicitacoesService solicitacaoService;
+    @Autowired
+    private EstadoSolicitacaoService estadoSolicitacaoService;
 
 
     @GetMapping
@@ -30,6 +34,17 @@ public class SolicitacaoController {
         Optional<Solicitacao> solicitacao = solicitacaoService.getSolicitacaoById(id);
         return solicitacao.map(value -> new ResponseEntity<>(value, HttpStatus.OK))
                 .orElseGet(() -> new ResponseEntity<>(HttpStatus.NOT_FOUND));
+    }
+
+    @GetMapping("/estado/{estado}")
+    public ResponseEntity<?> getSolicitacaoByEstadoAbertas(@PathVariable String estado) {
+        Optional<EstadoSolicitacao> estadoSolicitacao = estadoSolicitacaoService.buscarPorDescricao(estado.toUpperCase());
+        if (estadoSolicitacao.isPresent()) {
+            List<Solicitacao> solicitacoes = solicitacaoService.getSolicitacaoByEstado(estadoSolicitacao.get());
+            return new ResponseEntity<>(solicitacoes, HttpStatus.OK);
+        } else {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Este tipo de estado não existe! Verique a escrita e tente novamente!");
+        }
     }
 
     @GetMapping("/cliente/{idCliente}")
