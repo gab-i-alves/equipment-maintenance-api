@@ -3,6 +3,7 @@ package com.web2.projetoweb2.services;
 import com.web2.projetoweb2.entity.EstadoSolicitacao;
 import com.web2.projetoweb2.entity.Orcamento;
 import com.web2.projetoweb2.entity.Solicitacao;
+import com.web2.projetoweb2.entity.Usuario;
 import com.web2.projetoweb2.repositorys.OrcamentoRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -24,8 +25,17 @@ public class OrcamentoService {
     @Autowired
     private EstadoSolicitacaoService estadoSolicitacaoService;
 
-    public Orcamento criarOrcamento(Orcamento orcamento) {
+    public Orcamento criarOrcamento(Orcamento orcamento, Usuario funcionario) {
         orcamento.setDataHoraCriacao(LocalDateTime.now());
+        orcamento.setFuncionario(funcionario);
+
+        Solicitacao solicitacao = solicitacoesService.getSolicitacaoById(orcamento.getSolicitacao().getId()).orElseThrow(() -> new RuntimeException("Solicitação não encontrada"));
+
+        EstadoSolicitacao estadoOrcada = estadoSolicitacaoService.buscarPorDescricao("ORÇADA").orElseThrow(() -> new RuntimeException("Estado 'ORÇADA' não encontrado"));
+
+        solicitacao.setEstadoSolicitacao(estadoOrcada);
+        solicitacoesService.atualizarSolicitacao(solicitacao.getId(), solicitacao);
+
         return orcamentoRepository.save(orcamento);
     }
 

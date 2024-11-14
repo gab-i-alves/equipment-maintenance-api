@@ -58,6 +58,18 @@ public class SolicitacoesService {
         return solicitacaoRepository.save(solicitacao);
     }
 
+    public Solicitacao atualizarSolicitacao(Integer id, Solicitacao solicitacaoAtualizada) {
+        return solicitacaoRepository.findById(id).map(solicitacao -> {
+            solicitacao.setEstadoSolicitacao(solicitacaoAtualizada.getEstadoSolicitacao());
+            solicitacao.setCliente(solicitacaoAtualizada.getCliente());
+            solicitacao.setCategoriaEquipamento(solicitacaoAtualizada.getCategoriaEquipamento());
+            solicitacao.setDescricaoEquipamento(solicitacaoAtualizada.getDescricaoEquipamento());
+            solicitacao.setDescricaoDefeito(solicitacaoAtualizada.getDescricaoDefeito());
+            solicitacao.setMotivoRejeicao(solicitacaoAtualizada.getMotivoRejeicao());
+            return solicitacaoRepository.save(solicitacao);
+        }).orElseThrow(() -> new RuntimeException("Solicitação não encontrada"));
+    }
+
     public boolean deleteSolicitacao(Integer id) {
         return solicitacaoRepository.findById(id).map(solicitacao -> {
             solicitacaoRepository.delete(solicitacao);
