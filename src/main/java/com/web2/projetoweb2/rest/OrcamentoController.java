@@ -2,10 +2,12 @@ package com.web2.projetoweb2.rest;
 
 import com.web2.projetoweb2.dto.OrcamentoDTO;
 import com.web2.projetoweb2.entity.Orcamento;
+import com.web2.projetoweb2.entity.Usuario;
 import com.web2.projetoweb2.services.OrcamentoService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -18,8 +20,13 @@ public class OrcamentoController {
     private OrcamentoService orcamentoService;
 
     @PostMapping
-    public ResponseEntity<Orcamento> criarOrcamento(@RequestBody Orcamento orcamento) {
-        Orcamento novoOrcamento = orcamentoService.criarOrcamento(orcamento);
+    public ResponseEntity<Orcamento> criarOrcamento(@RequestBody OrcamentoDTO orcamentoDTO, @AuthenticationPrincipal Usuario funcionarioLogado) {
+        Orcamento orcamento = new Orcamento();
+
+        orcamento.setValor(orcamentoDTO.getValorOrcamento());
+        orcamento.setSolicitacao(orcamentoDTO.getSolicitacao());
+
+        Orcamento novoOrcamento = orcamentoService.criarOrcamento(orcamento, funcionarioLogado);
         return new ResponseEntity<>(novoOrcamento, HttpStatus.CREATED);
     }
 
