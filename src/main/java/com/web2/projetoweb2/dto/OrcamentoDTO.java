@@ -23,15 +23,15 @@ public class OrcamentoDTO {
 
     public OrcamentoDTO(Orcamento orcamento) {
         this.idOrcamento = orcamento.getId();
-        this.aprovado = orcamento.getAprovado();
+        this.aprovado = orcamento.getAprovado() != null ? orcamento.getAprovado() : false;
         this.valorOrcamento = orcamento.getValor();
-        this.rejeitado = orcamento.getRejeitado();
+        this.rejeitado = orcamento.getRejeitado() != null ? orcamento.getRejeitado() : false;
         this.motivoRejeicao = orcamento.getMotivoRejeicao();
         this.dataHoraCriacao = orcamento.getDataHoraCriacao();
         this.dataHoraAprovacao = orcamento.getDataHoraAprovacao();
         this.dataHoraRejeicao = orcamento.getDataHoraRejeicao();
-        this.idFuncionario = orcamento.getFuncionario().getId();
-        this.nomeFuncionario = orcamento.getFuncionario().getNome();
+        this.idFuncionario = orcamento.getFuncionario() != null ? orcamento.getFuncionario().getId() : 0;
+        this.nomeFuncionario = orcamento.getFuncionario() != null ? orcamento.getFuncionario().getNome() : "";
         this.solicitacao = orcamento.getSolicitacao();
     }
 }

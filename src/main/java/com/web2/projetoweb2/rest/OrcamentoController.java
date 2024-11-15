@@ -11,7 +11,7 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-
+@CrossOrigin
 @RestController
 @RequestMapping("/api/orcamentos")
 public class OrcamentoController {
@@ -25,6 +25,7 @@ public class OrcamentoController {
 
         orcamento.setValor(orcamentoDTO.getValorOrcamento());
         orcamento.setSolicitacao(orcamentoDTO.getSolicitacao());
+        orcamento.setFuncionario(funcionarioLogado);
 
         Orcamento novoOrcamento = orcamentoService.criarOrcamento(orcamento, funcionarioLogado);
         return new ResponseEntity<>(novoOrcamento, HttpStatus.CREATED);
