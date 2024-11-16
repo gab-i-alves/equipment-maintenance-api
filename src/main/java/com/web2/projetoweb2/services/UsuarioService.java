@@ -1,16 +1,15 @@
 package com.web2.projetoweb2.services;
 
-import com.web2.projetoweb2.entity.Usuario;
-import com.web2.projetoweb2.repositorys.UsuarioRepository;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import java.security.NoSuchAlgorithmException;
-
 import java.time.LocalDateTime;
-import java.util.Date;
 import java.util.List;
 import java.util.Optional;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import com.web2.projetoweb2.entity.Usuario;
+import com.web2.projetoweb2.repositorys.UsuarioRepository;
 
 @Service
 public class UsuarioService {
@@ -30,9 +29,9 @@ public class UsuarioService {
     }
 
     public Usuario createUsuario(Usuario usuario) {
-        try {
+        try { //A senha deverias ser enviada por e-mail para o usuário e não vinda do corpo da requisição 
             String salt = passwordHashingService.generateSalt();
-            String hashedPassword = passwordHashingService.hashPassword(usuario.getSenha(), salt);
+            String hashedPassword = passwordHashingService.hashPassword("SenhaÉEnviadaPorEmail", salt);
             usuario.setDataCriacao(LocalDateTime.now());
             usuario.setSenha(hashedPassword);
             usuario.setSalt(salt);
