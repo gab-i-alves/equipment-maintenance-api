@@ -53,3 +53,18 @@ SELECT 'Mouse'
 INSERT INTO categoria_equipamento (descricao)
 SELECT 'Teclado'
     WHERE NOT EXISTS (SELECT 1 FROM categoria_equipamento WHERE descricao = 'Teclado');
+
+
+-- //Tipo de perfil
+
+INSERT INTO tipo_perfil (descricao)
+SELECT 'Cliente'
+WHERE NOT EXISTS (
+    SELECT 1 FROM tipo_perfil WHERE descricao = 'Cliente'
+);
+
+INSERT INTO tipo_perfil (descricao)
+SELECT 'Funcionario'
+WHERE NOT EXISTS (
+    SELECT 1 FROM tipo_perfil WHERE descricao = 'Funcionario'
+);

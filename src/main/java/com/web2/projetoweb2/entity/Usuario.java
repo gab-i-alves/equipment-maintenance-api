@@ -1,10 +1,16 @@
 package com.web2.projetoweb2.entity;
 
-import jakarta.persistence.*;
+import java.time.LocalDateTime;
+
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import lombok.Data;
 import lombok.ToString;
-
-import java.time.LocalDateTime;
 
 @Data
 @Entity
@@ -16,6 +22,8 @@ public class Usuario {
 
     private String nome;
     private String email;
+    private String cpf;
+    private String telefone;
     private Boolean ativo;
     
     @ToString.Exclude
