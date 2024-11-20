@@ -8,6 +8,12 @@ import java.util.Optional;
 @Repository
 public interface UsuarioRepository extends JpaRepository<Usuario, Integer> {
     Usuario findById(Long id);
-
     Optional<Usuario> findByEmail(String email);
+
+    // Deletar usuário
+    void deleteById(Integer id);
+    
+    // RF001 - Autocadastro: CPF e email são únicos
+    boolean existsByCpf(String cpf);
+    boolean existsByEmail(String email);
 }

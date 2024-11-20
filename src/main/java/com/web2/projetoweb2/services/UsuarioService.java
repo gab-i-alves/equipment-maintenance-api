@@ -4,10 +4,13 @@ import java.security.NoSuchAlgorithmException;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
+import java.util.Random;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
+import com.web2.projetoweb2.entity.Endereco;
 import com.web2.projetoweb2.entity.Usuario;
 import com.web2.projetoweb2.repositorys.UsuarioRepository;
 
@@ -16,9 +19,14 @@ public class UsuarioService {
     @Autowired
     private UsuarioRepository usuarioRepository;
     
-    // private BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
     @Autowired
     private PasswordHashingService passwordHashingService;
+
+    @Autowired
+    private EmailService emailService;
+
+    @Autowired
+    private ViaCepService viaCepService;
 
     public List<Usuario> getAllUsuarios() {
         return usuarioRepository.findAll();
@@ -26,6 +34,52 @@ public class UsuarioService {
 
     public Optional<Usuario> getUsuarioById(Integer id) {
         return usuarioRepository.findById(id);
+    }
+
+    public Usuario autoCadastro(Usuario usuario) throws NoSuchAlgorithmException {
+        // RF001 - Autocadastro: CPF e email são únicos
+        if (usuarioRepository.existsByCpf(usuario.getCpf())) {
+            throw new RuntimeException("CPF já cadastrado!");
+        }
+        // RF001 - Autocadastro: CPF e email são únicos
+        if (usuarioRepository.existsByEmail(usuario.getEmail())) {
+            throw new RuntimeException("Email já cadastrado!");
+        }
+
+        // RF001 - Autocadastro: senha aleatória de 4 números
+        String senhaGerada = gerarSenhaAleatoria(); // Aqui são os 4 dígitos
+        String salt = passwordHashingService.generateSalt();
+        String hashedPassword = passwordHashingService.hashPassword(senhaGerada, salt);
+
+        usuario.setSenha(hashedPassword);
+        usuario.setSalt(salt);
+        usuario.setAtivo(true);
+        usuario.setDataCriacao(LocalDateTime.now());
+
+        // RF001 - Autocadastro: dadosViaCep
+        String cep = usuario.getEndereco().getCep();
+        Endereco enderecoCompleto = viaCepService.buscarEndereco(cep);
+        enderecoCompleto.setNumero(usuario.getEndereco().getNumero());
+        enderecoCompleto.setComplemento(usuario.getEndereco().getComplemento());
+        usuario.setEndereco(enderecoCompleto);
+
+        Usuario usuarioSalvo = usuarioRepository.save(usuario);
+
+        // RF001 - Autocadastro: email
+        emailService.enviarEmail(
+            usuario.getEmail(),
+            "Bem-vindo ao Sistema!",
+            "Olá, " + usuario.getNome() + "!\n\n" +
+            "Seu cadastro foi realizado com sucesso.\n" +
+            "Sua senha de acesso é: " + senhaGerada + "\n\n" +
+            "Atenciosamente,\nEquipe de Suporte"
+        );
+
+        return usuarioSalvo;
+    }
+
+    private String gerarSenhaAleatoria() {
+        return String.format("%04d", new Random().nextInt(10000)); // Gera 4 dígitos numéricos
     }
 
     public Usuario createUsuario(Usuario usuario) {
@@ -53,7 +107,7 @@ public class UsuarioService {
         });
     }
 
-
+    @Transactional
     public boolean deleteUsuario(Integer id) {
         return usuarioRepository.findById(id).map(usuario -> {
             usuarioRepository.delete(usuario);

@@ -7,6 +7,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.security.NoSuchAlgorithmException;
 import java.util.List;
 import java.util.Optional;
 
@@ -31,6 +32,11 @@ public class UsuarioController {
                       .orElseGet(() -> new ResponseEntity<>(HttpStatus.NOT_FOUND));
     }
 
+    @PostMapping("/autocadastro")
+    public ResponseEntity<Usuario> autoCadastro(@RequestBody Usuario usuario) throws NoSuchAlgorithmException {
+        Usuario novoUsuario = usuarioService.autoCadastro(usuario);
+        return new ResponseEntity<>(novoUsuario, HttpStatus.CREATED);
+    }
     
     @PostMapping
     public ResponseEntity<Usuario> createUsuario(@RequestBody Usuario usuario) {

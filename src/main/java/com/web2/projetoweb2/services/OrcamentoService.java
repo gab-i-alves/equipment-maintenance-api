@@ -34,7 +34,7 @@ public class OrcamentoService {
         EstadoSolicitacao estadoOrcada = estadoSolicitacaoService.buscarPorDescricao("ORÇADA").orElseThrow(() -> new RuntimeException("Estado 'ORÇADA' não encontrado"));
 
         solicitacao.setEstadoSolicitacao(estadoOrcada);
-        solicitacoesService.atualizarSolicitacao(solicitacao.getId(), solicitacao);
+        solicitacoesService.atualizarSolicitacao(solicitacao.getId(), solicitacao, funcionario);
 
         return orcamentoRepository.save(orcamento);
     }

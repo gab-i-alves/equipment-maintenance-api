@@ -2,6 +2,9 @@ package com.web2.projetoweb2.rest;
 
 import com.web2.projetoweb2.entity.EstadoSolicitacao;
 import com.web2.projetoweb2.entity.Solicitacao;
+import com.web2.projetoweb2.entity.SolicitacaoHistorico;
+import com.web2.projetoweb2.entity.Usuario;
+import com.web2.projetoweb2.repositorys.UsuarioRepository;
 import com.web2.projetoweb2.services.EstadoSolicitacaoService;
 import com.web2.projetoweb2.services.SolicitacoesService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -10,6 +13,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 @CrossOrigin
@@ -21,7 +25,8 @@ public class SolicitacaoController {
     private SolicitacoesService solicitacaoService;
     @Autowired
     private EstadoSolicitacaoService estadoSolicitacaoService;
-
+    @Autowired
+    private UsuarioRepository usuarioRepository;
 
     @GetMapping
     public ResponseEntity<List<Solicitacao>> getAllSolicitacoes() {
@@ -35,6 +40,34 @@ public class SolicitacaoController {
         Optional<Solicitacao> solicitacao = solicitacaoService.getSolicitacaoById(id);
         return solicitacao.map(value -> new ResponseEntity<>(value, HttpStatus.OK))
                 .orElseGet(() -> new ResponseEntity<>(HttpStatus.NOT_FOUND));
+    }
+
+    @Autowired
+    private SolicitacoesService solicitacoesService;
+
+    @GetMapping("/{id}/historico")
+    public ResponseEntity<?> getSolicitacaoHistorico(@PathVariable Integer id) {
+        try {
+            List<SolicitacaoHistorico> historico = solicitacoesService.getHistoricoBySolicitacao(id);
+            return ResponseEntity.ok(historico);
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
+        }
+    }
+
+    @PostMapping("/{id}/manutencao")
+    public ResponseEntity<Solicitacao> efetuarManutencao(
+        @PathVariable Integer id,
+        @RequestBody Map<String, String> requestBody,
+        @RequestHeader("idFuncionario") Integer idFuncionario
+    ) {
+        String descricaoManutencao = requestBody.get("descricaoManutencao");
+        String orientacoesCliente = requestBody.get("orientacoesCliente");
+        Usuario funcionario = usuarioRepository.findById(idFuncionario)
+                .orElseThrow(() -> new RuntimeException("Funcionário não encontrado"));
+
+        Solicitacao solicitacaoAtualizada = solicitacoesService.efetuarManutencao(id, descricaoManutencao, orientacoesCliente, funcionario);
+        return new ResponseEntity<>(solicitacaoAtualizada, HttpStatus.OK);
     }
 
     @GetMapping("/estado/{estado}")

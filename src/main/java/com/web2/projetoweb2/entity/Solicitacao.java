@@ -24,6 +24,14 @@ public class Solicitacao {
     @JoinColumn(name = "idCategoriaEquipamento")
     private CategoriaEquipamento categoriaEquipamento;
 
+    private String descricaoManutencao;
+    private String orientacoesCliente;
+    private LocalDateTime dataHoraManutencao;
+
+    @ManyToOne
+    @JoinColumn(name = "idFuncionarioManutencao")
+    private Usuario funcionarioManutencao;
+
     private String descricaoEquipamento;
     private String descricaoDefeito;
     private LocalDateTime dataHoraCriacao;
