@@ -103,4 +103,19 @@ public class SolicitacoesService {
         }).orElse(false);
     }
     
+    public Solicitacao efetuarManutencao(Integer idSolicitacao, String descricaoManutencao, String orientacoesCliente, Usuario funcionario) {
+        return solicitacaoRepository.findById(idSolicitacao).map(solicitacao -> {
+            solicitacao.setDescricaoManutencao(descricaoManutencao);
+            solicitacao.setOrientacoesCliente(orientacoesCliente);
+            solicitacao.setDataHoraManutencao(LocalDateTime.now());
+            solicitacao.setFuncionarioManutencao(funcionario);
+    
+            // Update the state to "ARRUMADA"
+            EstadoSolicitacao estadoArrumada = estadoSolicitacaoRepository.findByDescricao("ARRUMADA")
+                    .orElseThrow(() -> new RuntimeException("Estado 'ARRUMADA' não encontrado"));
+            solicitacao.setEstadoSolicitacao(estadoArrumada);
+    
+            return solicitacaoRepository.save(solicitacao);
+        }).orElseThrow(() -> new RuntimeException("Solicitação não encontrada"));
+    }
 }
