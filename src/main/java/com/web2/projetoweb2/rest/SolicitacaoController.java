@@ -2,6 +2,7 @@ package com.web2.projetoweb2.rest;
 
 import com.web2.projetoweb2.entity.EstadoSolicitacao;
 import com.web2.projetoweb2.entity.Solicitacao;
+import com.web2.projetoweb2.entity.SolicitacaoHistorico;
 import com.web2.projetoweb2.services.EstadoSolicitacaoService;
 import com.web2.projetoweb2.services.SolicitacoesService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,6 +36,19 @@ public class SolicitacaoController {
         Optional<Solicitacao> solicitacao = solicitacaoService.getSolicitacaoById(id);
         return solicitacao.map(value -> new ResponseEntity<>(value, HttpStatus.OK))
                 .orElseGet(() -> new ResponseEntity<>(HttpStatus.NOT_FOUND));
+    }
+
+    @Autowired
+    private SolicitacoesService solicitacoesService;
+
+    @GetMapping("/{id}/historico")
+    public ResponseEntity<?> getSolicitacaoHistorico(@PathVariable Integer id) {
+        try {
+            List<SolicitacaoHistorico> historico = solicitacoesService.getHistoricoBySolicitacao(id);
+            return ResponseEntity.ok(historico);
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
+        }
     }
 
     @GetMapping("/estado/{estado}")
