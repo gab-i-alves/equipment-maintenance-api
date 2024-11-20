@@ -3,14 +3,17 @@ package com.web2.projetoweb2.services;
 import com.web2.projetoweb2.entity.CategoriaEquipamento;
 import com.web2.projetoweb2.entity.EstadoSolicitacao;
 import com.web2.projetoweb2.entity.Solicitacao;
+import com.web2.projetoweb2.entity.SolicitacaoHistorico;
 import com.web2.projetoweb2.entity.Usuario;
 import com.web2.projetoweb2.repositorys.CategoriaEquipamentoRepository;
 import com.web2.projetoweb2.repositorys.EstadoSolicitacaoRepository;
+import com.web2.projetoweb2.repositorys.SolicitacaoHistoricoRepository;
 import com.web2.projetoweb2.repositorys.SolicitacaoRepository;
 import com.web2.projetoweb2.repositorys.UsuarioRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -58,7 +61,7 @@ public class SolicitacoesService {
         return solicitacaoRepository.save(solicitacao);
     }
 
-    public Solicitacao atualizarSolicitacao(Integer id, Solicitacao solicitacaoAtualizada) {
+    public Solicitacao atualizarSolicitacao(Integer id, Solicitacao solicitacaoAtualizada, Usuario funcionario) {
         return solicitacaoRepository.findById(id).map(solicitacao -> {
             solicitacao.setEstadoSolicitacao(solicitacaoAtualizada.getEstadoSolicitacao());
             solicitacao.setCliente(solicitacaoAtualizada.getCliente());
@@ -66,14 +69,53 @@ public class SolicitacoesService {
             solicitacao.setDescricaoEquipamento(solicitacaoAtualizada.getDescricaoEquipamento());
             solicitacao.setDescricaoDefeito(solicitacaoAtualizada.getDescricaoDefeito());
             solicitacao.setMotivoRejeicao(solicitacaoAtualizada.getMotivoRejeicao());
-            return solicitacaoRepository.save(solicitacao);
+    
+            Solicitacao updatedSolicitacao = solicitacaoRepository.save(solicitacao);
+    
+            addHistorico(updatedSolicitacao, funcionario, "Solicitação atualizada");
+    
+            return updatedSolicitacao;
         }).orElseThrow(() -> new RuntimeException("Solicitação não encontrada"));
     }
 
+    @Autowired
+    private SolicitacaoHistoricoRepository historicoRepository;
+
+    public List<SolicitacaoHistorico> getHistoricoBySolicitacao(Integer solicitacaoId) {
+        Solicitacao solicitacao = solicitacaoRepository.findById(solicitacaoId)
+                .orElseThrow(() -> new RuntimeException("Solicitação não encontrada"));
+        return historicoRepository.findBySolicitacao(solicitacao);
+    }
+
+    public void addHistorico(Solicitacao solicitacao, Usuario funcionario, String descricao) {
+        SolicitacaoHistorico historico = new SolicitacaoHistorico();
+        historico.setSolicitacao(solicitacao);
+        historico.setFuncionario(funcionario);
+        historico.setDescricao(descricao);
+        historico.setDataHora(LocalDateTime.now());
+        historicoRepository.save(historico);
+    }
+    
     public boolean deleteSolicitacao(Integer id) {
         return solicitacaoRepository.findById(id).map(solicitacao -> {
             solicitacaoRepository.delete(solicitacao);
             return true;
         }).orElse(false);
+    }
+    
+    public Solicitacao efetuarManutencao(Integer idSolicitacao, String descricaoManutencao, String orientacoesCliente, Usuario funcionario) {
+        return solicitacaoRepository.findById(idSolicitacao).map(solicitacao -> {
+            solicitacao.setDescricaoManutencao(descricaoManutencao);
+            solicitacao.setOrientacoesCliente(orientacoesCliente);
+            solicitacao.setDataHoraManutencao(LocalDateTime.now());
+            solicitacao.setFuncionarioManutencao(funcionario);
+    
+            // Update the state to "ARRUMADA"
+            EstadoSolicitacao estadoArrumada = estadoSolicitacaoRepository.findByDescricao("ARRUMADA")
+                    .orElseThrow(() -> new RuntimeException("Estado 'ARRUMADA' não encontrado"));
+            solicitacao.setEstadoSolicitacao(estadoArrumada);
+    
+            return solicitacaoRepository.save(solicitacao);
+        }).orElseThrow(() -> new RuntimeException("Solicitação não encontrada"));
     }
 }
