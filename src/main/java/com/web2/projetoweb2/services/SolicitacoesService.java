@@ -11,6 +11,7 @@ import com.web2.projetoweb2.repositorys.UsuarioRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -76,4 +77,17 @@ public class SolicitacoesService {
             return true;
         }).orElse(false);
     }
+
+    public Solicitacao confirmarPagamento(Integer id) {
+        return solicitacaoRepository.findById(id).map(solicitacao -> {
+            if (!"ARRUMADA".equalsIgnoreCase(solicitacao.getEstadoSolicitacao().getDescricao())) {
+                throw new RuntimeException("A solicitação não está no estado 'ARRUMADA'.");
+            }
+            solicitacao.setEstadoSolicitacao(estadoSolicitacaoRepository.findByDescricao("PAGA")
+                .orElseThrow(() -> new RuntimeException("Estado 'PAGA' não encontrado.")));
+            solicitacao.setDataHoraPagamento(LocalDateTime.now());
+            return solicitacaoRepository.save(solicitacao);
+        }).orElseThrow(() -> new RuntimeException("Solicitação não encontrada."));
+    }
+    
 }

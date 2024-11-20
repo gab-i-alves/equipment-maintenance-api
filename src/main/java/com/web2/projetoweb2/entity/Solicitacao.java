@@ -28,5 +28,6 @@ public class Solicitacao {
     private String descricaoDefeito;
     private LocalDateTime dataHoraCriacao;
     private String motivoRejeicao;
+    private LocalDateTime dataHoraPagamento;
 
 }
