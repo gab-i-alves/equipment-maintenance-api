@@ -108,6 +108,17 @@ public class SolicitacaoController {
 //    }
 
 
+    @PutMapping("/pagar/{id}")
+    public ResponseEntity<?> confirmarPagamento(@PathVariable Integer id) {
+        try {
+            Solicitacao solicitacaoAtualizada = solicitacaoService.confirmarPagamento(id);
+            return new ResponseEntity<>(solicitacaoAtualizada, HttpStatus.OK);
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
+        }
+    }
+
+
     @DeleteMapping("/delete/{id}")
     public ResponseEntity<Void> deleteSolicitacao(@PathVariable Integer id) {
         boolean deleted = solicitacaoService.deleteSolicitacao(id);
