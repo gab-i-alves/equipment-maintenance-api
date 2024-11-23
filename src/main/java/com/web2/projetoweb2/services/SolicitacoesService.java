@@ -1,5 +1,6 @@
 package com.web2.projetoweb2.services;
 
+import com.web2.projetoweb2.dto.ResponseRelatorioDTO;
 import com.web2.projetoweb2.entity.CategoriaEquipamento;
 import com.web2.projetoweb2.entity.EstadoSolicitacao;
 import com.web2.projetoweb2.entity.Solicitacao;
@@ -13,9 +14,9 @@ import com.web2.projetoweb2.repositorys.UsuarioRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 @Service
 public class SolicitacoesService {
@@ -42,6 +43,37 @@ public class SolicitacoesService {
     public List<Solicitacao> getSolicitacaoByEstado(EstadoSolicitacao estadoSolicitacao) {
         return solicitacaoRepository.findByEstadoSolicitacao(estadoSolicitacao);
     }
+
+    public List<Solicitacao> getAllSolicitacoesPagasByRangeDate(LocalDate dateInic, LocalDate dateFin) {
+        Optional<EstadoSolicitacao> estadoSolicitacao = estadoSolicitacaoRepository.findByDescricao("PAGA");
+
+        if (dateInic == null || dateFin == null) {
+            LocalDate now = LocalDate.now();
+            if (dateFin == null) {
+                dateFin = now;
+            }
+            if (dateInic == null) {
+                dateInic = now.minusDays(30);
+            }
+        }
+        LocalDateTime dateInicTime = dateInic.atStartOfDay();
+        LocalDateTime dateFinTime = dateFin.atTime(23, 59, 59);
+        return solicitacaoRepository.getAllSolicitacoesPagasByRangeDate(estadoSolicitacao.get(), dateInicTime, dateFinTime);
+    }
+
+
+    public List<ResponseRelatorioDTO> getRelatorioSolicitacoes(LocalDate dateInic, LocalDate dateFin) {
+        List<Solicitacao> solicitacoesPagas = this.getAllSolicitacoesPagasByRangeDate(dateInic, dateFin);
+        List<ResponseRelatorioDTO> responseListDTO = new ArrayList<>();
+
+        solicitacoesPagas.forEach(a -> {
+            ResponseRelatorioDTO dto = new ResponseRelatorioDTO(a);
+            responseListDTO.add(dto);
+        });
+
+        return responseListDTO;
+    }
+
 
     public List<Solicitacao> getSolicitacoesByClienteId(Integer idCliente) {
         return solicitacaoRepository.findByClienteId(idCliente);

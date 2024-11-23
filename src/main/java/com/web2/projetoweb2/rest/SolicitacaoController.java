@@ -1,5 +1,6 @@
 package com.web2.projetoweb2.rest;
 
+import com.web2.projetoweb2.dto.ResponseRelatorioDTO;
 import com.web2.projetoweb2.entity.EstadoSolicitacao;
 import com.web2.projetoweb2.entity.Solicitacao;
 import com.web2.projetoweb2.entity.SolicitacaoHistorico;
@@ -8,10 +9,12 @@ import com.web2.projetoweb2.repositorys.UsuarioRepository;
 import com.web2.projetoweb2.services.EstadoSolicitacaoService;
 import com.web2.projetoweb2.services.SolicitacoesService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -118,10 +121,22 @@ public class SolicitacaoController {
         }
     }
 
-
     @DeleteMapping("/delete/{id}")
     public ResponseEntity<Void> deleteSolicitacao(@PathVariable Integer id) {
         boolean deleted = solicitacaoService.deleteSolicitacao(id);
         return deleted ? new ResponseEntity<>(HttpStatus.NO_CONTENT) : new ResponseEntity<>(HttpStatus.NOT_FOUND);
+    }
+
+    @GetMapping("relatorios/pagas")
+    public ResponseEntity<List<ResponseRelatorioDTO>> getAllSolicitacoesPagasByRangeDate(
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate dateInic,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate dateFin)
+    {
+        List<ResponseRelatorioDTO> solicitacoes = solicitacaoService.getRelatorioSolicitacoes(dateInic, dateFin);
+        if (solicitacoes.isEmpty()) {
+            return ResponseEntity.noContent().build();
+        } else {
+            return ResponseEntity.ok(solicitacoes);
+        }
     }
 }

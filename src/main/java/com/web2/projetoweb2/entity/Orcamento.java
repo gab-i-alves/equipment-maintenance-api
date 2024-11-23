@@ -1,5 +1,6 @@
 package com.web2.projetoweb2.entity;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import lombok.Data;
 
@@ -20,6 +21,7 @@ public class Orcamento {
 
     @ManyToOne
     @JoinColumn(name = "idSolicitacao")
+    @JsonBackReference
     private Solicitacao solicitacao;
 
     private Boolean aprovado;

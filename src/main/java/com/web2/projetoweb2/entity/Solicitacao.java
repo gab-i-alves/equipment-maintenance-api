@@ -1,9 +1,11 @@
 package com.web2.projetoweb2.entity;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.Data;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Data
 @Entity
@@ -37,5 +39,9 @@ public class Solicitacao {
     private LocalDateTime dataHoraCriacao;
     private String motivoRejeicao;
     private LocalDateTime dataHoraPagamento;
+
+    @JsonManagedReference
+    @OneToMany(mappedBy = "solicitacao", fetch = FetchType.LAZY)
+    private List<Orcamento> orcamentos;
 
 }
