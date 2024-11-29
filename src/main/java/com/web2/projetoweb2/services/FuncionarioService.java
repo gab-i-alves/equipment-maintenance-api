@@ -1,17 +1,18 @@
 package com.web2.projetoweb2.services;
 
+import java.time.LocalDateTime;
+import java.util.List;
+import java.util.Optional;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 import com.web2.projetoweb2.dto.FuncionarioDTO;
 import com.web2.projetoweb2.entity.TipoPerfil;
 import com.web2.projetoweb2.entity.Usuario;
 import com.web2.projetoweb2.repositorys.TipoPerfilRepository;
 import com.web2.projetoweb2.repositorys.UsuarioRepository;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
-import java.time.LocalDateTime;
-import java.util.List;
-import java.util.Optional;
 
 @Service
 public class FuncionarioService {
@@ -45,6 +46,7 @@ public class FuncionarioService {
         funcionario.setNome(funcionarioDTO.getNome());
         funcionario.setAtivo(true);
         funcionario.setDataCriacao(LocalDateTime.now());
+        funcionario.setDataNascimento(funcionarioDTO.getDataNascimento());
 
         // Gerar hash da senha
         try {
@@ -79,6 +81,8 @@ public class FuncionarioService {
 
         funcionario.setEmail(funcionarioDTO.getEmail());
         funcionario.setNome(funcionarioDTO.getNome());
+        // A senha não pode ser alterada depois de criada
+        funcionario.setSenha(funcionario.getSenha());
 
         return usuarioRepository.save(funcionario);
     }
