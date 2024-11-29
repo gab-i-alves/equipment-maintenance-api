@@ -34,6 +34,7 @@ public class Usuario {
     private String cpf;
     
     @ToString.Exclude
+    
     private String senha;
 
     private String salt;
@@ -47,5 +48,7 @@ public class Usuario {
     private Endereco endereco;
 
     private LocalDateTime dataCriacao;
+
+    private String dataNascimento;
 
 }
