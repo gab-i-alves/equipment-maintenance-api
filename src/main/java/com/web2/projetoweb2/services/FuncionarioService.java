@@ -80,18 +80,6 @@ public class FuncionarioService {
         funcionario.setEmail(funcionarioDTO.getEmail());
         funcionario.setNome(funcionarioDTO.getNome());
 
-        // Atualizar senha apenas se fornecida
-        if (funcionarioDTO.getSenha() != null && !funcionarioDTO.getSenha().isEmpty()) {
-            try {
-                String salt = passwordHashingService.generateSalt();
-                String senhaHash = passwordHashingService.hashPassword(funcionarioDTO.getSenha(), salt);
-                funcionario.setSenha(senhaHash);
-                funcionario.setSalt(salt);
-            } catch (Exception e) {
-                throw new RuntimeException("Erro ao atualizar hash da senha", e);
-            }
-        }
-
         return usuarioRepository.save(funcionario);
     }
 
