@@ -37,7 +37,6 @@ public class SolicitacaoController {
         return new ResponseEntity<>(solicitacoes, HttpStatus.OK);
     }
 
-
     @GetMapping("/{id}")
     public ResponseEntity<Solicitacao> getSolicitacaoById(@PathVariable Integer id) {
         Optional<Solicitacao> solicitacao = solicitacaoService.getSolicitacaoById(id);
@@ -60,27 +59,29 @@ public class SolicitacaoController {
 
     @PostMapping("/{id}/manutencao")
     public ResponseEntity<Solicitacao> efetuarManutencao(
-        @PathVariable Integer id,
-        @RequestBody Map<String, String> requestBody,
-        @RequestHeader("idFuncionario") Integer idFuncionario
-    ) {
+            @PathVariable Integer id,
+            @RequestBody Map<String, String> requestBody,
+            @RequestHeader("idFuncionario") Integer idFuncionario) {
         String descricaoManutencao = requestBody.get("descricaoManutencao");
         String orientacoesCliente = requestBody.get("orientacoesCliente");
         Usuario funcionario = usuarioRepository.findById(idFuncionario)
                 .orElseThrow(() -> new RuntimeException("Funcionário não encontrado"));
 
-        Solicitacao solicitacaoAtualizada = solicitacoesService.efetuarManutencao(id, descricaoManutencao, orientacoesCliente, funcionario);
+        Solicitacao solicitacaoAtualizada = solicitacoesService.efetuarManutencao(id, descricaoManutencao,
+                orientacoesCliente, funcionario);
         return new ResponseEntity<>(solicitacaoAtualizada, HttpStatus.OK);
     }
 
     @GetMapping("/estado/{estado}")
     public ResponseEntity<?> getSolicitacaoByEstadoAbertas(@PathVariable String estado) {
-        Optional<EstadoSolicitacao> estadoSolicitacao = estadoSolicitacaoService.buscarPorDescricao(estado.toUpperCase());
+        Optional<EstadoSolicitacao> estadoSolicitacao = estadoSolicitacaoService
+                .buscarPorDescricao(estado.toUpperCase());
         if (estadoSolicitacao.isPresent()) {
             List<Solicitacao> solicitacoes = solicitacaoService.getSolicitacaoByEstado(estadoSolicitacao.get());
             return new ResponseEntity<>(solicitacoes, HttpStatus.OK);
         } else {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Este tipo de estado não existe! Verique a escrita e tente novamente!");
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body("Este tipo de estado não existe! Verique a escrita e tente novamente!");
         }
     }
 
@@ -95,6 +96,16 @@ public class SolicitacaoController {
         }
     }
 
+    @GetMapping("/funcionario/{idFuncionario}")
+    public ResponseEntity<List<Solicitacao>> getSolicitacoesByFuncionarioId(@PathVariable Integer idFuncionario) {
+        List<Solicitacao> solicitacoes = solicitacaoService.getSolicitacoesPorFuncionarioId(idFuncionario);
+
+        if (solicitacoes.isEmpty()) {
+            return ResponseEntity.noContent().build();
+        } else {
+            return ResponseEntity.ok(solicitacoes);
+        }
+    }
 
     @PostMapping
     public ResponseEntity<Solicitacao> createSolicitacao(@RequestBody Solicitacao solicitacao) {
@@ -102,14 +113,15 @@ public class SolicitacaoController {
         return new ResponseEntity<>(createdSolicitacao, HttpStatus.CREATED);
     }
 
-
-//    @PutMapping("/update/{id}")
-//    public ResponseEntity<Solicitacao> updateSolicitacao(@PathVariable Integer id, @RequestBody Solicitacao solicitacaoDetails) {
-//        Optional<Solicitacao> updatedSolicitacao = solicitacaoService.updateSolicitacao(id, solicitacaoDetails);
-//        return updatedSolicitacao.map(value -> new ResponseEntity<>(value, HttpStatus.OK))
-//                .orElseGet(() -> new ResponseEntity<>(HttpStatus.NOT_FOUND));
-//    }
-
+    // @PutMapping("/update/{id}")
+    // public ResponseEntity<Solicitacao> updateSolicitacao(@PathVariable Integer
+    // id, @RequestBody Solicitacao solicitacaoDetails) {
+    // Optional<Solicitacao> updatedSolicitacao =
+    // solicitacaoService.updateSolicitacao(id, solicitacaoDetails);
+    // return updatedSolicitacao.map(value -> new ResponseEntity<>(value,
+    // HttpStatus.OK))
+    // .orElseGet(() -> new ResponseEntity<>(HttpStatus.NOT_FOUND));
+    // }
 
     @PutMapping("/pagar/{id}")
     public ResponseEntity<?> confirmarPagamento(@PathVariable Integer id) {
@@ -130,8 +142,7 @@ public class SolicitacaoController {
     @GetMapping("relatorios/pagas")
     public ResponseEntity<List<ResponseRelatorioDTO>> getAllSolicitacoesPagasByRangeDate(
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate dateInic,
-            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate dateFin)
-    {
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate dateFin) {
         List<ResponseRelatorioDTO> solicitacoes = solicitacaoService.getRelatorioSolicitacoes(dateInic, dateFin);
         if (solicitacoes.isEmpty()) {
             return ResponseEntity.noContent().build();
