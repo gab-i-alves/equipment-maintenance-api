@@ -40,6 +40,12 @@ public class Solicitacao {
     private String motivoRejeicao;
     private LocalDateTime dataHoraPagamento;
 
+    @ManyToOne
+    @JoinColumn(name = "idFuncionarioFinalizacao")
+    private Usuario funcionarioFinalizacao;
+    private LocalDateTime dataHoraFinalizacao;
+
+
     @JsonManagedReference
     @OneToMany(mappedBy = "solicitacao", fetch = FetchType.LAZY)
     private List<Orcamento> orcamentos;
