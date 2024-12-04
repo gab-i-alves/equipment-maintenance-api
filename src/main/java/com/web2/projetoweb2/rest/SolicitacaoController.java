@@ -133,6 +133,17 @@ public class SolicitacaoController {
         }
     }
 
+    @PutMapping("/finalizar/{id}")
+    public ResponseEntity<?> finalizarSolicitacao(@PathVariable Integer id, @RequestParam Integer idFuncionario) {
+        try {
+            Solicitacao solicitacaoFinalizada = solicitacaoService.finalizarSolicitacao(id, idFuncionario);
+            return new ResponseEntity<>(solicitacaoFinalizada, HttpStatus.OK);
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
+        }
+    }
+
+
     @DeleteMapping("/delete/{id}")
     public ResponseEntity<Void> deleteSolicitacao(@PathVariable Integer id) {
         boolean deleted = solicitacaoService.deleteSolicitacao(id);

@@ -154,6 +154,23 @@ public class SolicitacoesService {
         }).orElseThrow(() -> new RuntimeException("Solicitação não encontrada."));
     }
 
+    public Solicitacao finalizarSolicitacao(Integer id, Integer idFuncionario) {
+        return solicitacaoRepository.findById(id).map(solicitacao -> {
+            if (!"PAGA".equalsIgnoreCase(solicitacao.getEstadoSolicitacao().getDescricao())) {
+                throw new RuntimeException("A solicitação não está no estado 'PAGA'.");
+            }
+            Usuario funcionario = usuarioRepository.findById(idFuncionario)
+                    .orElseThrow(() -> new RuntimeException("Funcionário não encontrado."));
+    
+            solicitacao.setEstadoSolicitacao(estadoSolicitacaoRepository.findByDescricao("FINALIZADA")
+                    .orElseThrow(() -> new RuntimeException("Estado 'FINALIZADA' não encontrado.")));
+            solicitacao.setDataHoraFinalizacao(LocalDateTime.now());
+            solicitacao.setFuncionarioFinalizacao(funcionario);
+            return solicitacaoRepository.save(solicitacao);
+        }).orElseThrow(() -> new RuntimeException("Solicitação não encontrada."));
+    }
+    
+
     public Solicitacao efetuarManutencao(Integer idSolicitacao, String descricaoManutencao, String orientacoesCliente,
             Usuario funcionario) {
         return solicitacaoRepository.findById(idSolicitacao).map(solicitacao -> {
