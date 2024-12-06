@@ -8,6 +8,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Optional;
 
 @CrossOrigin
 @RestController
@@ -24,32 +25,44 @@ public class CategoriaEquipamentoController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<CategoriaEquipamento> buscarCategoriaPorId(@PathVariable Integer id) {
-        CategoriaEquipamento categoria = categoriaEquipamentoService.buscarPorId(id);
-        return categoria != null ? ResponseEntity.ok(categoria) : ResponseEntity.notFound().build();
+    public ResponseEntity<Optional<CategoriaEquipamento>> buscarCategoriaPorId(@PathVariable Integer id) {
+        return categoriaEquipamentoService.buscarPorId(id)
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
     }
 
     @PostMapping
     public ResponseEntity<?> adicionarCategoria(@RequestBody CategoriaEquipamento categoria) {
         try {
             CategoriaEquipamento novaCategoria = categoriaEquipamentoService.adicionarCategoria(categoria);
-            return ResponseEntity.status(HttpStatus.CREATED).body(novaCategoria);
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.status(HttpStatus.CONFLICT).body("Categoria com a mesma descrição já existe.");
+            return new ResponseEntity<>(novaCategoria, HttpStatus.CREATED);
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body("Erro ao criar a categoria: " + e.getMessage());
         }
     }
 
 
-    @PutMapping("/update/{id}")
-    public ResponseEntity<CategoriaEquipamento> atualizarCategoria(@PathVariable Integer id, @RequestBody CategoriaEquipamento categoriaAtualizada) {
-        CategoriaEquipamento categoria = categoriaEquipamentoService.atualizarCategoria(id, categoriaAtualizada);
-        return categoria != null ? ResponseEntity.ok(categoria) : ResponseEntity.notFound().build();
+    @PutMapping("/{id}")
+    public ResponseEntity<?> atualizarCategoria(
+        @PathVariable Integer id,
+        @RequestBody CategoriaEquipamento categoriaAtualizada) {
+        try {
+            CategoriaEquipamento categoria = categoriaEquipamentoService.atualizarCategoria(id, categoriaAtualizada);
+            return ResponseEntity.ok(categoria);
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body("Erro ao atualizar a categoria: " + e.getMessage());
+        }
     }
 
 
-    @DeleteMapping("/delete/{id}")
-    public ResponseEntity<Void> deletarCategoria(@PathVariable Integer id) {
-        boolean deletada = categoriaEquipamentoService.deletarCategoria(id);
-        return deletada ? ResponseEntity.noContent().build() : ResponseEntity.notFound().build();
+    @DeleteMapping("/{id}")
+    public ResponseEntity<?> deletarCategoria(@PathVariable Integer id) {
+
+        try {
+            categoriaEquipamentoService.deletarCategoria(id);
+            return ResponseEntity.noContent().build();
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body("Erro ao remover categoria: " + e.getMessage());
+        }
     }
 }
