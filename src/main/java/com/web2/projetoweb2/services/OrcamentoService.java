@@ -1,5 +1,6 @@
 package com.web2.projetoweb2.services;
 
+import com.web2.projetoweb2.dto.OrcamentoDTO;
 import com.web2.projetoweb2.entity.EstadoSolicitacao;
 import com.web2.projetoweb2.entity.Orcamento;
 import com.web2.projetoweb2.entity.Solicitacao;
@@ -25,16 +26,22 @@ public class OrcamentoService {
     @Autowired
     private EstadoSolicitacaoService estadoSolicitacaoService;
 
-    public Orcamento criarOrcamento(Orcamento orcamento, Usuario funcionario) {
+    @Autowired
+    private UsuarioService usuarioService;
+
+    public Orcamento criarOrcamento(OrcamentoDTO orcamentoDTO) {
+        Orcamento orcamento = new Orcamento();
+        orcamento.setValor(orcamentoDTO.getValorOrcamento());
+        orcamento.setSolicitacao(orcamentoDTO.getSolicitacao());
         orcamento.setDataHoraCriacao(LocalDateTime.now());
-        orcamento.setFuncionario(funcionario);
 
+        Optional<Usuario> funcionario = usuarioService.getUsuarioById(Integer.valueOf(String.valueOf(orcamentoDTO.getIdFuncionario())));
         Solicitacao solicitacao = solicitacoesService.getSolicitacaoById(orcamento.getSolicitacao().getId()).orElseThrow(() -> new RuntimeException("Solicitação não encontrada"));
-
         EstadoSolicitacao estadoOrcada = estadoSolicitacaoService.buscarPorDescricao("ORÇADA").orElseThrow(() -> new RuntimeException("Estado 'ORÇADA' não encontrado"));
 
+        funcionario.ifPresent(orcamento::setFuncionario);
         solicitacao.setEstadoSolicitacao(estadoOrcada);
-        solicitacoesService.atualizarSolicitacao(solicitacao.getId(), solicitacao, funcionario);
+        solicitacoesService.atualizarSolicitacao(solicitacao.getId(), solicitacao, orcamento.getFuncionario());
 
         return orcamentoRepository.save(orcamento);
     }

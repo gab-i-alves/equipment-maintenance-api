@@ -21,13 +21,7 @@ public class OrcamentoController {
 
     @PostMapping
     public ResponseEntity<Orcamento> criarOrcamento(@RequestBody OrcamentoDTO orcamentoDTO, @AuthenticationPrincipal Usuario funcionarioLogado) {
-        Orcamento orcamento = new Orcamento();
-
-        orcamento.setValor(orcamentoDTO.getValorOrcamento());
-        orcamento.setSolicitacao(orcamentoDTO.getSolicitacao());
-        orcamento.setFuncionario(funcionarioLogado);
-
-        Orcamento novoOrcamento = orcamentoService.criarOrcamento(orcamento, funcionarioLogado);
+        Orcamento novoOrcamento = orcamentoService.criarOrcamento(orcamentoDTO);
         return new ResponseEntity<>(novoOrcamento, HttpStatus.CREATED);
     }
 
