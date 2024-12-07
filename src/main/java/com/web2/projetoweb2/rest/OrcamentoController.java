@@ -69,9 +69,9 @@ public class OrcamentoController {
     }
 
     @PutMapping("/rejeitar/{id}")
-    public ResponseEntity<OrcamentoDTO> rejeitarOrcamento(@PathVariable Integer id,  @RequestBody Orcamento orcamentoReq) {
+    public ResponseEntity<OrcamentoDTO> rejeitarOrcamento(@PathVariable Integer id,  @RequestBody String motivoRejeicao) {
         try {
-            Orcamento orcamento = orcamentoService.rejeitarOrcamento(id, orcamentoReq.getMotivoRejeicao());
+            Orcamento orcamento = orcamentoService.rejeitarOrcamento(id, motivoRejeicao);
             return new ResponseEntity<>(new OrcamentoDTO(orcamento), HttpStatus.OK);
         } catch (RuntimeException e) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
