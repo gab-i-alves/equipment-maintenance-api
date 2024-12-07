@@ -86,15 +86,17 @@ public class SolicitacoesService {
 
     public Solicitacao createSolicitacao(Solicitacao solicitacao) {
         Usuario cliente = usuarioRepository.findById(solicitacao.getCliente().getId());
-        Optional<EstadoSolicitacao> estadoSolicitacao = estadoSolicitacaoRepository
-                .findById(solicitacao.getEstadoSolicitacao().getId());
+
+        solicitacao.setEstadoSolicitacao(estadoSolicitacaoRepository.findByDescricao("ABERTA")
+                .orElseThrow(() -> new RuntimeException("Estado 'ABERTA' não encontrado.")));
+
         Optional<CategoriaEquipamento> categoria = categoriaEquipamentoRepository
                 .findById(solicitacao.getCategoriaEquipamento().getId());
 
         if (cliente != null) {
             solicitacao.setCliente(cliente);
         }
-        estadoSolicitacao.ifPresent(solicitacao::setEstadoSolicitacao);
+
         categoria.ifPresent(solicitacao::setCategoriaEquipamento);
 
         return solicitacaoRepository.save(solicitacao);
