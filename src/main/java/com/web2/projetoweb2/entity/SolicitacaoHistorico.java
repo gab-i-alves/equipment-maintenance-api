@@ -20,6 +20,10 @@ public class SolicitacaoHistorico {
 
     private LocalDateTime dataHora;
 
+    private String estadoAntigo;
+    private String estadoNovo;
+    private LocalDateTime dataHoraMudanca;
+
     @ManyToOne
     @JoinColumn(name = "funcionario_id")
     private Usuario funcionario;

@@ -155,6 +155,17 @@ public class SolicitacaoController {
         }
     }
 
+    @PutMapping("/resgatar/{id}")
+    public ResponseEntity<Solicitacao> resgatarSolicitacao(@PathVariable Integer id) {
+        try {
+            Solicitacao solicitacaoAprovada = solicitacoesService.resgatarSolicitacao(id);
+            return new ResponseEntity<>(solicitacaoAprovada, HttpStatus.OK);
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
+        }
+    }
+
+
     @PutMapping("/finalizar/{id}")
     public ResponseEntity<?> finalizarSolicitacao(@PathVariable Integer id, @RequestParam Integer idFuncionario) {
         try {
