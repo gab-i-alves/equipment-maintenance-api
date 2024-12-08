@@ -124,15 +124,15 @@ public class SolicitacoesService {
 
     public List<SolicitacaoHistorico> getHistoricoBySolicitacao(Integer solicitacaoId) {
         Solicitacao solicitacao = solicitacaoRepository.findById(solicitacaoId)
-                .orElseThrow(() -> new RuntimeException("Solicitação não encontrada"));
-        return historicoRepository.findBySolicitacao(solicitacao);
+            .orElseThrow(() -> new RuntimeException("Solicitação não encontrada"));
+        return historicoRepository.findBySolicitacaoOrderByDataHoraDesc(solicitacao);
     }
 
     public void addHistorico(Solicitacao solicitacao, Usuario funcionario, String descricao) {
         SolicitacaoHistorico historico = new SolicitacaoHistorico();
         historico.setSolicitacao(solicitacao);
-        historico.setFuncionario(funcionario);
         historico.setDescricao(descricao);
+        historico.setFuncionario(funcionario);
         historico.setDataHora(LocalDateTime.now());
         historicoRepository.save(historico);
     }
