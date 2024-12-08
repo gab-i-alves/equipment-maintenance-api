@@ -59,17 +59,39 @@ public class SolicitacaoController {
 
     @PostMapping("/{id}/manutencao")
     public ResponseEntity<Solicitacao> efetuarManutencao(
-            @PathVariable Integer id,
-            @RequestBody Map<String, String> requestBody,
-            @RequestHeader("idFuncionario") Integer idFuncionario) {
+        @PathVariable Integer id,
+        @RequestBody Map<String, String> requestBody,
+        @RequestHeader("idFuncionario") Integer idFuncionario) {
         String descricaoManutencao = requestBody.get("descricaoManutencao");
         String orientacoesCliente = requestBody.get("orientacoesCliente");
-        Usuario funcionario = usuarioRepository.findById(idFuncionario)
-                .orElseThrow(() -> new RuntimeException("Funcionário não encontrado"));
+        
+        return new ResponseEntity<>(
+            solicitacoesService.efetuarManutencao(
+                id, 
+                descricaoManutencao, 
+                orientacoesCliente, 
+                idFuncionario
+            ),
+            HttpStatus.OK
+        );
+    }
 
-        Solicitacao solicitacaoAtualizada = solicitacoesService.efetuarManutencao(id, descricaoManutencao,
-                orientacoesCliente, funcionario);
-        return new ResponseEntity<>(solicitacaoAtualizada, HttpStatus.OK);
+    @PostMapping("/{id}/redirecionamento")
+    public ResponseEntity<Solicitacao> redirecionarManutencao(
+        @PathVariable Integer id,
+        @RequestBody Map<String, Integer> requestBody) {
+        Integer idFuncionarioOrigem = requestBody.get("idFuncionarioOrigem");
+        Integer idFuncionarioDestino = requestBody.get("idFuncionarioDestino");
+        
+        // Implementation in service
+        return new ResponseEntity<>(
+            solicitacoesService.redirecionarManutencao(
+                id, 
+                idFuncionarioOrigem, 
+                idFuncionarioDestino
+            ),
+            HttpStatus.OK
+        );
     }
 
     @GetMapping("/estado/{estado}")

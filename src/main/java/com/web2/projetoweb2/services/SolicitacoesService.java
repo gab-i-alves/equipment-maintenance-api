@@ -3,11 +3,13 @@ package com.web2.projetoweb2.services;
 import com.web2.projetoweb2.dto.ResponseRelatorioDTO;
 import com.web2.projetoweb2.entity.CategoriaEquipamento;
 import com.web2.projetoweb2.entity.EstadoSolicitacao;
+import com.web2.projetoweb2.entity.Redirecionamento;
 import com.web2.projetoweb2.entity.Solicitacao;
 import com.web2.projetoweb2.entity.SolicitacaoHistorico;
 import com.web2.projetoweb2.entity.Usuario;
 import com.web2.projetoweb2.repositorys.CategoriaEquipamentoRepository;
 import com.web2.projetoweb2.repositorys.EstadoSolicitacaoRepository;
+import com.web2.projetoweb2.repositorys.RedirecionamentoRepository;
 import com.web2.projetoweb2.repositorys.SolicitacaoHistoricoRepository;
 import com.web2.projetoweb2.repositorys.SolicitacaoRepository;
 import com.web2.projetoweb2.repositorys.UsuarioRepository;
@@ -23,15 +25,20 @@ public class SolicitacoesService {
     private final SolicitacaoRepository solicitacaoRepository;
     private final UsuarioRepository usuarioRepository;
     private final EstadoSolicitacaoRepository estadoSolicitacaoRepository;
+    private final RedirecionamentoRepository redirecionamentoRepository;
     private final CategoriaEquipamentoRepository categoriaEquipamentoRepository;
+    
 
     public SolicitacoesService(SolicitacaoRepository solicitacaoRepository, UsuarioRepository usuarioRepository,
             EstadoSolicitacaoRepository estadoSolicitacaoRepository,
-            CategoriaEquipamentoRepository categoriaEquipamentoRepository) {
+            CategoriaEquipamentoRepository categoriaEquipamentoRepository,
+            RedirecionamentoRepository redirecionamentoRepository) {
         this.solicitacaoRepository = solicitacaoRepository;
         this.usuarioRepository = usuarioRepository;
         this.estadoSolicitacaoRepository = estadoSolicitacaoRepository;
         this.categoriaEquipamentoRepository = categoriaEquipamentoRepository;
+        this.redirecionamentoRepository = 
+        redirecionamentoRepository;
     }
 
     public List<Solicitacao> getAllSolicitacoes() {
@@ -173,20 +180,66 @@ public class SolicitacoesService {
     }
     
 
-    public Solicitacao efetuarManutencao(Integer idSolicitacao, String descricaoManutencao, String orientacoesCliente,
-            Usuario funcionario) {
-        return solicitacaoRepository.findById(idSolicitacao).map(solicitacao -> {
+    public Solicitacao efetuarManutencao(Integer id, String descricaoManutencao, String orientacoesCliente, Integer idFuncionario) {
+        return solicitacaoRepository.findById(id).map(solicitacao -> {
+            // Get the employee
+            Usuario funcionario = usuarioRepository.findById(idFuncionario)
+                .orElseThrow(() -> new RuntimeException("Funcionário não encontrado"));
+
+            // Get ARRUMADA state
+            EstadoSolicitacao estadoArrumada = estadoSolicitacaoRepository.findByDescricao("ARRUMADA")
+                .orElseThrow(() -> new RuntimeException("Estado 'ARRUMADA' não encontrado"));
+
+            // Update solicitacao
             solicitacao.setDescricaoManutencao(descricaoManutencao);
             solicitacao.setOrientacoesCliente(orientacoesCliente);
             solicitacao.setDataHoraManutencao(LocalDateTime.now());
             solicitacao.setFuncionarioManutencao(funcionario);
-
-            // Update the state to "ARRUMADA"
-            EstadoSolicitacao estadoArrumada = estadoSolicitacaoRepository.findByDescricao("ARRUMADA")
-                    .orElseThrow(() -> new RuntimeException("Estado 'ARRUMADA' não encontrado"));
             solicitacao.setEstadoSolicitacao(estadoArrumada);
+
+            // Add to history
+            addHistorico(solicitacao, funcionario, "Manutenção efetuada");
 
             return solicitacaoRepository.save(solicitacao);
         }).orElseThrow(() -> new RuntimeException("Solicitação não encontrada"));
     }
+
+    public Solicitacao redirecionarManutencao(Integer id, Integer idFuncionarioOrigem, Integer idFuncionarioDestino) {
+        return solicitacaoRepository.findById(id).map(solicitacao -> {
+            // Check if source and destination employees exist
+            Usuario funcionarioOrigem = usuarioRepository.findById(idFuncionarioOrigem)
+                .orElseThrow(() -> new RuntimeException("Funcionário de origem não encontrado"));
+            
+            Usuario funcionarioDestino = usuarioRepository.findById(idFuncionarioDestino)
+                .orElseThrow(() -> new RuntimeException("Funcionário de destino não encontrado"));
+
+            // Check if not redirecting to self
+            if (idFuncionarioOrigem.equals(idFuncionarioDestino)) {
+                throw new RuntimeException("Não é possível redirecionar para o mesmo funcionário");
+            }
+
+            // Get REDIRECIONADA state
+            EstadoSolicitacao estadoRedirecionada = estadoSolicitacaoRepository.findByDescricao("REDIRECIONADA")
+                .orElseThrow(() -> new RuntimeException("Estado 'REDIRECIONADA' não encontrado"));
+
+            // Create redirection record
+            Redirecionamento redirecionamento = new Redirecionamento();
+            redirecionamento.setSolicitacao(solicitacao);
+            redirecionamento.setFuncionarioOrigem(funcionarioOrigem);
+            redirecionamento.setFuncionarioDestino(funcionarioDestino);
+            redirecionamento.setDataHoraCriacao(LocalDateTime.now());
+            redirecionamentoRepository.save(redirecionamento);
+
+            // Update solicitacao
+            solicitacao.setEstadoSolicitacao(estadoRedirecionada);
+            solicitacao.setFuncionarioManutencao(funcionarioDestino);
+
+            // Add to history
+            addHistorico(solicitacao, funcionarioOrigem, 
+                "Solicitação redirecionada para " + funcionarioDestino.getNome());
+
+            return solicitacaoRepository.save(solicitacao);
+        }).orElseThrow(() -> new RuntimeException("Solicitação não encontrada"));
+    }
+
 }
