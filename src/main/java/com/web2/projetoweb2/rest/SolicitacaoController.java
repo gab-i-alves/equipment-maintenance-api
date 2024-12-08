@@ -133,8 +133,8 @@ public class SolicitacaoController {
         }
     }
 
-    @PutMapping("/aprovar/{id}")
-    public ResponseEntity<Solicitacao> aprovarSolicitacao(@PathVariable Integer id) {
+    @PutMapping("/resgatar/{id}")
+    public ResponseEntity<Solicitacao> resgatarSolicitacao(@PathVariable Integer id) {
         try {
             Solicitacao solicitacaoAprovada = solicitacoesService.resgatarSolicitacao(id);
             return new ResponseEntity<>(solicitacaoAprovada, HttpStatus.OK);
