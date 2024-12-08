@@ -189,4 +189,29 @@ public class SolicitacoesService {
             return solicitacaoRepository.save(solicitacao);
         }).orElseThrow(() -> new RuntimeException("Solicitação não encontrada"));
     }
+
+    public Solicitacao resgatarSolicitacao(Integer idSolicitacao) {
+        Solicitacao solicitacao = solicitacaoRepository.findById(idSolicitacao)
+                .orElseThrow(() -> new RuntimeException("Solicitação não encontrada"));
+    
+        if (!solicitacao.getEstadoSolicitacao().getDescricao().equals("REJEITADA")) {
+            throw new RuntimeException("A solicitação não está no estado REJEITADA.");
+        }
+    
+        EstadoSolicitacao estadoAprovada = estadoSolicitacaoRepository.findByDescricao("APROVADA")
+                .orElseThrow(() -> new RuntimeException("Estado APROVADA não encontrado"));
+    
+        solicitacao.setEstadoSolicitacao(estadoAprovada);
+        solicitacaoRepository.save(solicitacao);
+    
+        SolicitacaoHistorico historico = new SolicitacaoHistorico();
+        historico.setSolicitacao(solicitacao);
+        historico.setEstadoAntigo("REJEITADA");
+        historico.setEstadoNovo("APROVADA");
+        historico.setDataHoraMudanca(LocalDateTime.now());
+        historicoRepository.save(historico);
+    
+        return solicitacao;
+    }
+    
 }
