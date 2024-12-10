@@ -43,9 +43,14 @@ public class UsuarioController {
     }
 
     @PostMapping("/autocadastro")
-    public ResponseEntity<Usuario> autoCadastro(@RequestBody Usuario usuario) throws NoSuchAlgorithmException {
-        Usuario novoUsuario = usuarioService.autoCadastro(usuario);
-        return new ResponseEntity<>(novoUsuario, HttpStatus.CREATED);
+    public ResponseEntity<?> autoCadastro(@RequestBody Usuario usuario) throws NoSuchAlgorithmException {
+        try{
+            Usuario novoUsuario = usuarioService.autoCadastro(usuario);
+            return new ResponseEntity<>(novoUsuario, HttpStatus.CREATED);
+        }catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body("Erro ao cadastrar usuário: " + e.getMessage());
+        }
+        
     }
     
     @PostMapping
