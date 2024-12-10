@@ -79,11 +79,11 @@ public class UsuarioService {
     }
 
     private String gerarSenhaAleatoria() {
-        return String.format("%04d", new Random().nextInt(10000)); // Gera 4 dígitos numéricos
+        return String.format("%04d", new Random().nextInt(10000));
     }
 
     public Usuario createUsuario(Usuario usuario) {
-        try { //A senha deverias ser enviada por e-mail para o usuário e não vinda do corpo da requisição 
+        try {
             String salt = passwordHashingService.generateSalt();
             String hashedPassword = passwordHashingService.hashPassword("SenhaÉEnviadaPorEmail", salt);
             usuario.setDataCriacao(LocalDateTime.now());
