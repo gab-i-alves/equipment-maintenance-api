@@ -183,7 +183,7 @@ public class SolicitacaoController {
         return deleted ? new ResponseEntity<>(HttpStatus.NO_CONTENT) : new ResponseEntity<>(HttpStatus.NOT_FOUND);
     }
 
-    @GetMapping("relatorios/pagas")
+    @GetMapping("/relatorios/pagas")
     public ResponseEntity<List<ResponseRelatorioDTO>> getAllSolicitacoesPagasByRangeDate(
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate dateInic,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate dateFin) {
