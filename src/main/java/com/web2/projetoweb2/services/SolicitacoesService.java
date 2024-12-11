@@ -54,7 +54,7 @@ public class SolicitacoesService {
     }
 
     public List<Solicitacao> getAllSolicitacoesPagasByRangeDate(LocalDate dateInic, LocalDate dateFin) {
-        Optional<EstadoSolicitacao> estadoSolicitacao = estadoSolicitacaoRepository.findByDescricao("PAGA");
+        Optional<EstadoSolicitacao> estadoSolicitacao = estadoSolicitacaoRepository.findByDescricao("FINALIZADA");
 
         if (dateInic == null || dateFin == null) {
             LocalDate now = LocalDate.now();
